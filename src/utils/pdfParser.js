@@ -1,7 +1,8 @@
 import * as pdfjs from 'pdfjs-dist';
+import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.mjs`;
+// Configure PDF.js worker - use Vite's worker bundling
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 /**
  * Parse a UTEC course schedule PDF

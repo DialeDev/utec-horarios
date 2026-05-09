@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { toast } from 'sonner';
 import { useSchedule } from '../../context/ScheduleContext';
 
 export default function ClassSelector() {
@@ -14,7 +15,9 @@ export default function ClassSelector() {
   const handleSectionClick = (subject, section) => {
     const result = toggleSection(subject, section);
     if (!result.success) {
-      alert(result.error); // Simple alert visual para el error (req 3)
+      toast.error(result.error);
+    } else {
+      toast.success(result.action === 'added' ? 'Sección agregada' : 'Sección removida');
     }
   };
 

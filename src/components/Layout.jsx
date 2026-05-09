@@ -16,8 +16,9 @@ export default function Layout() {
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="text-xl font-bold text-slate-800">📅 UniScheduler</h1>
           <nav className="flex gap-2">
-            <Link to="/" className={navClass('/')}>Fase 1: Materias</Link>
-            <Link to="/builder" className={navClass('/builder')}>Fase 2: Horario</Link>
+            <Link to="/" className={navClass('/')}>Inicio</Link>
+            <Link to="/subjects" className={navClass('/subjects')}>Materias</Link>
+            <Link to="/builder" className={navClass('/builder')}>Horario</Link>
           </nav>
         </div>
       </header>
