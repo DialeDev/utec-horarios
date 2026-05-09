@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", system-ui, sans-serif;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-danger: #ef4444;
+}
+
+/* Estilos base */
+body {
+  background-color: #f8fafc;
+  font-family: var(--font-sans);
+}
