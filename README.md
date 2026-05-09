@@ -1,16 +1,77 @@
-# React + Vite
+# UniScheduler 📅
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Build your UTEC weekly timetable in minutes. No conflicts. Export as PDF.**
 
-Currently, two official plugins are available:
+UniScheduler is a student-friendly web app that transforms the UTEC "hoja de asesorías" PDF into an interactive, conflict-free schedule builder.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+## ✨ Features
 
-## React Compiler
+- 📄 **Upload PDF** — Parse your UTEC advisory sheet automatically
+- 🔧 **Manual Entry** — Add courses manually if needed
+- ⚡ **Real-time Conflict Detection** — Never double-book a time slot
+- 📅 **Interactive Weekly Grid** — Visual timetable with drag-to-select
+- 🎨 **Custom PDF Export** — Download your schedule with themes and colors
+- 🔒 **Privacy-first** — All data stays in your browser (localStorage)
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## 🚀 Quick Start
 
-## Expanding the ESLint configuration
+```bash
+# Clone the repo
+git clone https://github.com/DialeDev/utec-horarios.git
+cd utec-horarios
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+# Install dependencies
+npm install
+
+# Start dev server
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173)
+
+## 📖 How It Works
+
+1. **Upload your PDF** — Drop your UTEC "hoja de asesorías" (advisory sheet)
+2. **Build your schedule** — Click sections to add them to your weekly grid
+3. **Export as PDF** — Choose a theme, pick a color, download your schedule
+
+## 🛠️ Tech Stack
+
+- **React 19** + Vite 7
+- **Tailwind CSS 4**
+- **React Router 7**
+- **pdfjs** — PDF parsing
+- **jsPDF** — PDF generation
+
+## 📁 Project Structure
+
+```
+src/
+├── components/
+│   ├── Landing.jsx          # Entry: upload or manual
+│   ├── PDFUploader.jsx      # PDF upload & parse
+│   ├── ScheduleBuilder.jsx   # Accordion + grid + controls
+│   └── PDFExporter.jsx       # Theme selector + download
+├── context/
+│   └── ScheduleContext.jsx   # State management
+├── utils/
+│   ├── pdfParser.js          # Extract courses from PDF
+│   ├── scheduler.js           # Conflict detection
+│   ├── pdfGenerator.js       # Generate PDF
+│   ├── day.js                # Day parsing
+│   └── time.js               # Time parsing
+├── App.jsx
+└── main.jsx
+```
+
+## 🎯 Workflow
+
+```
+Upload PDF ──► Parse Data ──► Select Sections ──► Weekly Grid ──► Export PDF
+                 │                                      │
+          Manual Entry ◄──────────────────────────────────┘
+```
+
+## 📄 License
+
+MIT — Free to use and modify.
