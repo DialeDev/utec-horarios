@@ -1,4 +1,4 @@
-import { createContext, useState, useEffect, use } from 'react';
+import { createContext, useState, useEffect, useContext } from 'react';
 import { parseDays, parseTimeRange, checkTimeConflict } from '../utils/time';
 
 const ScheduleContext = createContext(null);
@@ -16,6 +16,12 @@ export function ScheduleProvider({ children }) {
     return saved ? JSON.parse(saved) : [];
   });
 
+  // Estado 3: Preferencias de Exportación
+  const [exportPrefs, setExportPrefs] = useState(() => {
+    const saved = localStorage.getItem('uni_export_prefs');
+    return saved ? JSON.parse(saved) : { theme: 'light', color: '#2563eb', showCode: true, showRoom: true };
+  });
+
   useEffect(() => {
     localStorage.setItem('uni_subjects', JSON.stringify(subjects));
   }, [subjects]);
@@ -23,6 +29,10 @@ export function ScheduleProvider({ children }) {
   useEffect(() => {
     localStorage.setItem('uni_schedule', JSON.stringify(schedule));
   }, [schedule]);
+
+  useEffect(() => {
+    localStorage.setItem('uni_export_prefs', JSON.stringify(exportPrefs));
+  }, [exportPrefs]);
 
   // --- ACCIONES FASE 1 (Gestión de Materias) ---
 
@@ -46,6 +56,15 @@ export function ScheduleProvider({ children }) {
     setSubjects(prev => prev.map(sub => 
       sub.id === updatedSubject.id ? updatedSubject : sub
     ));
+  };
+
+  // Reset subjects from PDF import
+  const resetSubjects = (courses) => {
+    setSubjects(courses.map(course => ({
+      ...course,
+      id: crypto.randomUUID()
+    })));
+    setSchedule([]);
   };
 
   // --- ACCIONES FASE 2 (Gestión de Horario) ---
@@ -91,8 +110,9 @@ export function ScheduleProvider({ children }) {
 
   return (
     <ScheduleContext.Provider value={{ 
-      subjects, addSubject, deleteSubject, updateSubject, 
-      schedule, toggleSection 
+      subjects, addSubject, deleteSubject, updateSubject, resetSubjects,
+      schedule, toggleSection,
+      exportPrefs, setExportPrefs
     }}>
       {children}
     </ScheduleContext.Provider>
@@ -100,7 +120,7 @@ export function ScheduleProvider({ children }) {
 }
 
 export const useSchedule = () => {
-  const context = use(ScheduleContext);
+  const context = useContext(ScheduleContext);
   if (!context) throw new Error("useSchedule debe usarse dentro de ScheduleProvider");
   return context;
 };
