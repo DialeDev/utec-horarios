@@ -7,13 +7,35 @@ export function ScheduleProvider({ children }) {
   // Estado 1: Inventario de Materias
   const [subjects, setSubjects] = useState(() => {
     const saved = localStorage.getItem('uni_subjects');
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    const parsed = JSON.parse(saved);
+    // Migration: ensure every subject has an id
+    const migrated = parsed.map(sub => ({
+      ...sub,
+      id: sub.id || crypto.randomUUID(),
+    }));
+    if (migrated.length > 0 && !parsed[0]?.id) {
+      localStorage.setItem('uni_subjects', JSON.stringify(migrated));
+    }
+    return migrated;
   });
 
   // Estado 2: Horario Seleccionado
   const [schedule, setSchedule] = useState(() => {
     const saved = localStorage.getItem('uni_schedule');
-    return saved ? JSON.parse(saved) : [];
+    if (!saved) return [];
+    const parsed = JSON.parse(saved);
+    // Migration: add id and courseId if missing (schema v1 -> v2)
+    const migrated = parsed.map(item => ({
+      ...item,
+      id: item.id || crypto.randomUUID(),
+      courseId: item.courseId || '',
+    }));
+    if (migrated.length > 0 && !parsed[0]?.id) {
+      localStorage.setItem('uni_schedule', JSON.stringify(migrated));
+      localStorage.setItem('uni_schema_version', '2');
+    }
+    return migrated;
   });
 
   // Estado 3: Preferencias de Exportación
