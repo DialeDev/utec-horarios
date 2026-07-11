@@ -113,12 +113,12 @@ export function ScheduleProvider({ children }) {
       setSchedule(prev => [
         ...prev, 
         { 
+          ...section,
           id: crypto.randomUUID(),
           courseId: subject.id,
           sectionId: section.id,
           name: subject.name,
           code: subject.code,
-          ...section 
         }
       ]);
       return { success: true, action: 'added' };

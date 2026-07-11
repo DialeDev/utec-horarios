@@ -17,7 +17,7 @@ export default function Landing() {
         {/* Hero Section */}
         <div className="space-y-4">
           <h1 className="text-4xl font-bold text-slate-800">
-            📅 UniScheduler UTEC
+            📅 Horarios Utec
           </h1>
           <p className="text-lg text-slate-600">
             Construye tu horario académico de forma rápida y sencilla
