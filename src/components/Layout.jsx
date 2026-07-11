@@ -14,7 +14,7 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-800">📅 UniScheduler</h1>
+          <h1 className="text-xl font-bold text-slate-800">📅 Horarios Utec</h1>
           <nav className="flex gap-2">
             <Link to="/" className={navClass('/')}>Inicio</Link>
             <Link to="/subjects" className={navClass('/subjects')}>Materias</Link>
