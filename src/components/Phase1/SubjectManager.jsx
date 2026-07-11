@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useSchedule } from '../../context/ScheduleContext';
 import { toast } from 'sonner';
+import { FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
 
 export default function SubjectManager() {
   const { addSubject, updateSubject, deleteSubject, subjects } = useSchedule();
@@ -153,7 +154,7 @@ export default function SubjectManager() {
                     className="text-red-400 hover:text-red-600 px-2 font-bold"
                     title="Quitar sección"
                   >
-                    ×
+<FiX size={14} />
                   </button>
                 </div>
               ))}
@@ -195,14 +196,14 @@ export default function SubjectManager() {
                     className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded transition-colors"
                     title="Editar"
                   >
-                    ✏️
+<FiEdit2 size={16} />
                   </button>
                   <button 
                     onClick={() => handleDeleteClick(sub.id, sub.name)}
                     className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
                     title="Eliminar"
                   >
-                    🗑️
+                    <FiTrash2 size={16} />
                   </button>
                 </div>
 

@@ -5,32 +5,6 @@ import pdfWorker from 'pdfjs-dist/build/pdf.worker.mjs?url';
 pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
 
 /**
- * Parse a UTEC course schedule PDF
- * @param {File} file - PDF file to parse
- * @returns {Promise<{courses: Array, warnings: Array}>}
- */
-export async function parsePDF(file) {
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
-  
-  let fullText = '';
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const textContent = await page.getTextContent();
-    fullText += textContent.items.map(item => item.str).join(' ') + '\n';
-  }
-
-  const warnings = [];
-  const courses = parseTableRows(fullText, warnings);
-
-  if (courses.length === 0) {
-    warnings.push('No se encontraron materias en el PDF. Verifica que sea la hoja de asesorías de UTEC.');
-  }
-
-  return { courses, warnings };
-}
-
-/**
  * Day name mapping: abbreviated forms → canonical 3-letter forms
  */
 const DAY_ABBREVIATIONS = {
@@ -56,116 +30,213 @@ function normalizeDays(daysStr) {
       return DAY_ORDER.slice(si, ei + 1).join('-');
     }
   }
-  // Try to normalize single day aliases
   return DAY_ABBREVIATIONS[trimmed] || trimmed;
 }
 
 /**
- * Parse table rows from extracted PDF text using time-anchored strategy
- * @param {string} text - Full PDF text
- * @param {string[]} warnings - Warning array to push into
- * @returns {Array} - Array of Course objects
+ * Known room fragment words that appear on separate lines from course data.
+ * - PREFIXES: appear on a line ABOVE the course row (start of multi-word room)
+ * - SUFFIXES: appear on a line BELOW the course row (end of multi-word room)
  */
-function parseTableRows(text, warnings) {
-  const courses = [];
-  const seenCourses = new Map();
-  
-  // Find all time anchors (HH:MM-HH:MM)
-  const timePattern = /\b(\d{1,2}:\d{2}-\d{1,2}:\d{2})\b/g;
-  const codePattern = /^[A-Z0-9]{2,}(?:-[A-Z0-9]{1,3})?$/;
-  
-  let timeMatch;
-  let searchPos = 0;
-  
-  while ((timeMatch = timePattern.exec(text)) !== null) {
-    const timeStr = timeMatch[1];
-    const timeIdx = timeMatch.index;
-    
-    // Get text before time (about 150 chars back)
-    const beforeStart = Math.max(0, timeIdx - 150);
-    const beforeText = text.slice(beforeStart, timeIdx).trim();
-    
-    // Get text after time (about 50 chars forward)
-    const afterEnd = Math.min(text.length, timeIdx + timeStr.length + 50);
-    const afterText = text.slice(timeIdx + timeStr.length, afterEnd).trim();
-    
-    // Parse backwards from the end of beforeText
-    // Expected structure: ... CODE    NAME    SECTION    MATRICULA    DAYS
-    // Where DAYS immediately precedes the time
-    
-    // Split beforeText into tokens
-    const tokens = beforeText.split(/\s+/).filter(t => t.length > 0);
-    
-    if (tokens.length < 4) continue;
-    
-    // The last token before time should be days (e.g., "Ma-Ju", "Lu-Vi", "Sab")
-    const daysCandidate = tokens[tokens.length - 1];
-    
-    // The second-to-last should be matricula (single digit)
-    const matriculaCandidate = tokens[tokens.length - 2];
-    
-    // The third-to-last should be section number
-    const sectionCandidate = tokens[tokens.length - 3];
-    
-    // Everything before that is CODE + NAME (variable length)
-    // Find the code: look for a pattern like AAA-NN or AAANNN at the start
-    let code = '';
-    let nameStartIdx = 0;
-    
-    for (let i = 0; i < Math.min(tokens.length - 3, 5); i++) {
-      const candidate = tokens[i];
-      if (/^[A-Z0-9]{2,}(?:-[A-Z0-9]{1,3})?$/.test(candidate) && !/^\d+$/.test(candidate)) {
-        code = candidate;
-        nameStartIdx = i + 1;
-        break;
-      }
-    }
-    
-    if (!code) {
-      warnings.push(`Fila ignorada: no se pudo identificar código de materia cerca de "${beforeText.slice(-60)}"`);
-      continue;
-    }
-    
-    // Everything between code and section is the course name
-    const nameTokens = tokens.slice(nameStartIdx, tokens.length - 3);
-    if (nameTokens.length === 0) {
-      warnings.push(`Fila ignorada: sin nombre para materia ${code}`);
-      continue;
-    }
-    const name = nameTokens.join(' ');
-    const section = sectionCandidate;
-    
-    // Validate section is a number
-    if (!/^\d+$/.test(section)) {
-      continue;
-    }
-    
-    // Parse room from afterText
-    const room = afterText.replace(/\s+/g, ' ').trim() || 'EN LINEA';
-    
-    // Normalize days
-    const formattedDays = normalizeDays(daysCandidate);
-    
-    // Create or update course
-    if (!seenCourses.has(code)) {
-      seenCourses.set(code, {
-        id: crypto.randomUUID(),
-        code,
-        name,
-        sections: []
-      });
-    }
-    
-    const course = seenCourses.get(code);
-    course.sections.push({
-      id: crypto.randomUUID(),
-      number: section,
-      days: formattedDays,
-      time: timeStr,
-      room,
-      matricula: matriculaCandidate
+const ROOM_PREFIXES = new Set(['EN', 'GG-']);
+const ROOM_SUFFIXES = new Set(['LINEA', 'MAGNA']);
+
+/**
+ * Regex to match course codes like BAS2-I, FILO-H, FIS1-I, EPRO-AC, etc.
+ */
+const CODE_REGEX = /^[A-Z0-9]{2,}(?:-[A-Za-z0-9]{1,3})?$/;
+
+/**
+ * Regex to match time ranges like "06:30-08:00"
+ */
+const TIME_REGEX = /\b(\d{1,2}:\d{2}-\d{1,2}:\d{2})\b/;
+
+/**
+ * Maximum Y distance (in PDF units) for a line to be considered an adjacent
+ * room fragment (prefix above or suffix below).
+ */
+const Y_THRESHOLD = 20;
+
+/**
+ * Extract text items grouped into lines by Y position proximity.
+ * Returns an array of { y, text } sorted top-to-bottom.
+ */
+function extractLines(textContent) {
+  const yGroups = new Map();
+  for (const item of textContent.items) {
+    const y = Math.round(item.transform[5] / 5) * 5;
+    if (!yGroups.has(y)) yGroups.set(y, []);
+    yGroups.get(y).push({ str: item.str, x: item.transform[4] });
+  }
+
+  const lines = [];
+  for (const [y, items] of yGroups) {
+    items.sort((a, b) => a.x - b.x);
+    lines.push({
+      y,
+      text: items.map(i => i.str).join(' ').replace(/\s+/g, ' ').trim()
     });
   }
-  
-  return Array.from(seenCourses.values());
+
+  lines.sort((a, b) => b.y - a.y);
+  return lines;
+}
+
+/**
+ * Parse course data from a line of text that contains a time pattern.
+ * Returns null if the line doesn't contain valid course data.
+ */
+function parseCourseLine(text) {
+  const timeMatch = text.match(TIME_REGEX);
+  if (!timeMatch) return null;
+
+  const timeStr = timeMatch[1];
+  const timeIdx = timeMatch.index;
+  const beforeText = text.slice(0, timeIdx).trim();
+  const afterText = text.slice(timeIdx + timeStr.length).trim();
+
+  const tokens = beforeText.split(/\s+/).filter(Boolean);
+  if (tokens.length < 4) return null;
+
+  // Last 3 tokens are: days, matricula, section (backwards)
+  const days = tokens[tokens.length - 1];
+  const matricula = tokens[tokens.length - 2];
+  const section = tokens[tokens.length - 3];
+
+  if (!/^\d+$/.test(section)) return null;
+
+  // Find course code in the first few tokens
+  let code = '';
+  let nameStartIdx = 0;
+  for (let j = 0; j < Math.min(tokens.length - 3, 5); j++) {
+    const candidate = tokens[j];
+    if (CODE_REGEX.test(candidate) && !/^\d+$/.test(candidate)) {
+      code = candidate;
+      nameStartIdx = j + 1;
+      break;
+    }
+  }
+
+  if (!code) return null;
+
+  const nameTokens = tokens.slice(nameStartIdx, tokens.length - 3);
+  if (nameTokens.length === 0) return null;
+
+  return {
+    code,
+    name: nameTokens.join(' '),
+    section,
+    matricula,
+    days,
+    time: timeStr,
+    roomMiddle: afterText
+  };
+}
+
+/**
+ * Reconstruct the full room string by combining fragments from adjacent lines.
+ *
+ * In the PDF, room values can span multiple lines:
+ *   - PREFIX (above course line): "EN" or "GG-"
+ *   - MIDDLE (on course line, after time): e.g., "LINEA", "AULA", "SB-508"
+ *   - SUFFIX (below course line): "LINEA" or "MAGNA"
+ */
+function reconstructRoom(courseLineY, lines, index) {
+  let prefix = '';
+  let suffix = '';
+
+  // Check line above for room prefix
+  if (index > 0) {
+    const above = lines[index - 1];
+    const dist = above.y - courseLineY;
+    if (dist > 0 && dist <= Y_THRESHOLD) {
+      const text = above.text.trim();
+      if (ROOM_PREFIXES.has(text)) {
+        prefix = text;
+      }
+    }
+  }
+
+  // Check line below for room suffix
+  if (index < lines.length - 1) {
+    const below = lines[index + 1];
+    const dist = courseLineY - below.y;
+    if (dist > 0 && dist <= Y_THRESHOLD) {
+      const text = below.text.trim();
+      if (ROOM_SUFFIXES.has(text)) {
+        suffix = text;
+      }
+    }
+  }
+
+  return [prefix, courseLineY.roomMiddle, suffix]
+    .filter(Boolean)
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim() || 'EN LINEA';
+}
+
+/**
+ * Parse a UTEC course schedule PDF.
+ *
+ * The PDF has a tabular layout with columns:
+ *   CODE | NAME | SEC | MAT | DAYS | TIME | AULA
+ *
+ * Room values often span multiple lines due to long names:
+ *   "EN" + "LINEA" = "EN LINEA"
+ *   "GG-" + "AULA" + "MAGNA" = "GG- AULA MAGNA"
+ *
+ * @param {File} file - PDF file to parse
+ * @returns {Promise<{courses: Array, warnings: Array}>}
+ */
+export async function parsePDF(file) {
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjs.getDocument({ data: arrayBuffer }).promise;
+
+  const courses = [];
+  const seenCourses = new Map();
+  const warnings = [];
+
+  // Process each page INDEPENDENTLY — Y coordinates are page-relative
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);
+    const textContent = await page.getTextContent();
+    const lines = extractLines(textContent);
+
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      const parsed = parseCourseLine(line.text);
+      if (!parsed) continue;
+
+      // Reconstruct room from adjacent lines within the SAME page
+      const room = reconstructRoom(parsed, lines, i);
+      const normalizedDays = normalizeDays(parsed.days);
+
+      if (!seenCourses.has(parsed.code)) {
+        const course = {
+          id: crypto.randomUUID(),
+          code: parsed.code,
+          name: parsed.name,
+          sections: []
+        };
+        seenCourses.set(parsed.code, course);
+        courses.push(course);
+      }
+
+      seenCourses.get(parsed.code).sections.push({
+        id: crypto.randomUUID(),
+        number: parsed.section,
+        days: normalizedDays,
+        time: parsed.time,
+        room,
+        matricula: parsed.matricula
+      });
+    }
+  }
+
+  if (courses.length === 0) {
+    warnings.push('No se encontraron materias en el PDF. Verifica que sea la hoja de asesorías de UTEC.');
+  }
+
+  return { courses, warnings };
 }

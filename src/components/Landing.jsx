@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useSchedule } from '../context/ScheduleContext';
 import PDFUploader from './PDFUploader';
+import { FiCalendar, FiFile, FiEdit2 } from 'react-icons/fi';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -16,8 +17,8 @@ export default function Landing() {
       <div className="max-w-2xl w-full space-y-8 text-center">
         {/* Hero Section */}
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold text-slate-800">
-            📅 Horarios Utec
+          <h1 className="text-4xl font-bold text-slate-800 flex items-center justify-center gap-3">
+            <FiCalendar className="text-blue-600" /> Horarios Utec
           </h1>
           <p className="text-lg text-slate-600">
             Construye tu horario académico de forma rápida y sencilla
@@ -28,7 +29,7 @@ export default function Landing() {
         <div className="grid md:grid-cols-2 gap-4">
           {/* PDF Upload */}
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow">
-            <div className="text-4xl mb-4">📄</div>
+            <div className="text-4xl mb-4"><FiFile className="inline-block text-slate-600" size={48} /></div>
             <h2 className="text-xl font-bold text-slate-800 mb-2">
               Subir Hoja de Asesorías
             </h2>
@@ -43,7 +44,7 @@ export default function Landing() {
 
           {/* Manual Entry */}
           <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow">
-            <div className="text-4xl mb-4">✏️</div>
+            <div className="text-4xl mb-4"><FiEdit2 className="inline-block text-slate-600" size={48} /></div>
             <h2 className="text-xl font-bold text-slate-800 mb-2">
               Ingresar Manualmente
             </h2>

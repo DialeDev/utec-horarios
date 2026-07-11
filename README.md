@@ -1,19 +1,19 @@
-# UniScheduler 📅
+# UniScheduler
 
 **Build your UTEC weekly timetable in minutes. No conflicts. Export as PDF.**
 
-UniScheduler is a student-friendly web app that transforms the UTEC "hoja de asesorías" PDF into an interactive, conflict-free schedule builder.
+UniScheduler is a student-friendly web app that transforms the UTEC "hoja de asesorias" PDF into an interactive, conflict-free schedule builder.
 
-## ✨ Features
+## Features
 
-- 📄 **Upload PDF** — Parse your UTEC advisory sheet automatically
-- 🔧 **Manual Entry** — Add courses manually if needed
-- ⚡ **Real-time Conflict Detection** — Never double-book a time slot
-- 📅 **Interactive Weekly Grid** — Visual timetable with drag-to-select
-- 🎨 **Custom PDF Export** — Download your schedule with themes and colors
-- 🔒 **Privacy-first** — All data stays in your browser (localStorage)
+- **Upload PDF** — Parse your UTEC advisory sheet automatically
+- **Manual Entry** — Add courses manually if needed
+- **Real-time Conflict Detection** — Never double-book a time slot
+- **Interactive Weekly Grid** — Visual timetable with conflict highlighting
+- **Custom PDF Export** — Download your schedule
+- **Privacy-first** — All data stays in your browser (localStorage)
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Clone the repo
@@ -21,57 +21,66 @@ git clone https://github.com/DialeDev/utec-horarios.git
 cd utec-horarios
 
 # Install dependencies
-npm install
+pnpm install
 
 # Start dev server
-npm run dev
+pnpm dev
 ```
 
 Open [http://localhost:5173](http://localhost:5173)
 
-## 📖 How It Works
+## How It Works
 
-1. **Upload your PDF** — Drop your UTEC "hoja de asesorías" (advisory sheet)
+1. **Upload your PDF** — Drop your UTEC "hoja de asesorias" (advisory sheet)
 2. **Build your schedule** — Click sections to add them to your weekly grid
-3. **Export as PDF** — Choose a theme, pick a color, download your schedule
+3. **Export as PDF** — Pick a theme, download your schedule
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **React 19** + Vite 7
 - **Tailwind CSS 4**
 - **React Router 7**
-- **pdfjs** — PDF parsing
-- **jsPDF** — PDF generation
+- **pdfjs** — PDF parsing with Y-position-aware table extraction
+- **jsPDF** — PDF generation (schedule export)
+- **react-icons** — Feather icons throughout the UI
+- **sonner** — Toast notifications
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
 ├── components/
-│   ├── Landing.jsx          # Entry: upload or manual
-│   ├── PDFUploader.jsx      # PDF upload & parse
-│   ├── ScheduleBuilder.jsx   # Accordion + grid + controls
-│   └── PDFExporter.jsx       # Theme selector + download
+│   ├── Phase1/
+│   │   └── SubjectManager.jsx   # Add/edit/delete courses and sections
+│   ├── CourseAccordion.jsx      # Expandable course list with sections
+│   ├── ErrorBoundary.jsx        # Error boundary with reload
+│   ├── Landing.jsx              # Entry: upload PDF or manual entry
+│   ├── Layout.jsx               # App shell with header + nav
+│   ├── PDFExporter.jsx          # Schedule PDF export with themes
+│   ├── PDFUploader.jsx          # PDF file upload and parse trigger
+│   ├── ScheduleBuilder.jsx      # Orchestrator: accordion + grid + controls
+│   ├── ToastProvider.jsx        # Sonner toast container
+│   └── WeeklyGrid.jsx           # Visual timetable grid
 ├── context/
-│   └── ScheduleContext.jsx   # State management
+│   └── ScheduleContext.jsx      # Schedule + subjects state management
 ├── utils/
-│   ├── pdfParser.js          # Extract courses from PDF
-│   ├── scheduler.js           # Conflict detection
-│   ├── pdfGenerator.js       # Generate PDF
-│   ├── day.js                # Day parsing
-│   └── time.js               # Time parsing
+│   ├── pdfParser.js             # Y-position-aware PDF course extraction
+│   ├── scheduler.js             # Conflict detection
+│   ├── pdfGenerator.js          # Schedule PDF generation
+│   ├── day.js                   # Day parsing (Lu-Vi -> Lunes..Viernes)
+│   └── time.js                  # Time parsing and conflict math
 ├── App.jsx
 └── main.jsx
 ```
 
-## 🎯 Workflow
+## Workflow
 
 ```
-Upload PDF ──► Parse Data ──► Select Sections ──► Weekly Grid ──► Export PDF
-                 │                                      │
-          Manual Entry ◄──────────────────────────────────┘
+Upload PDF --> Parse Data --> Select Sections --> Weekly Grid --> Export PDF
+                 |                                |
+          Manual Entry <---------------------------+
 ```
 
-## 📄 License
+## License
 
 MIT — Free to use and modify.

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { useSchedule } from '../context/ScheduleContext';
 import { detectConflict } from '../utils/scheduler';
+import { FiCheck, FiX, FiCircle, FiChevronUp, FiChevronDown } from 'react-icons/fi';
 
 export default function CourseAccordion() {
   const { subjects, toggleSection, schedule } = useSchedule();
@@ -61,7 +62,7 @@ export default function CourseAccordion() {
                 <div className="font-semibold text-sm text-slate-800">{subject.name}</div>
                 <div className="text-xs text-slate-400">{subject.code}</div>
               </div>
-              <span className="text-slate-400 text-xs">{openSubjectId === subject.id ? '▲' : '▼'}</span>
+              <span className="text-slate-400">{openSubjectId === subject.id ? <FiChevronUp size={16} /> : <FiChevronDown size={16} />}</span>
             </button>
 
             {openSubjectId === subject.id && (
@@ -86,7 +87,7 @@ export default function CourseAccordion() {
                           status === 'conflicted' ? 'text-red-500' :
                           'text-slate-300'
                         }`}>
-                          {status === 'selected' ? '✓' : status === 'conflicted' ? '✗' : '○'}
+                          {status === 'selected' ? <FiCheck size={16} className="text-green-600" /> : status === 'conflicted' ? <FiX size={16} className="text-red-500" /> : <FiCircle size={16} className="text-slate-300" />}
                         </span>
                         <div>
                           <span className="font-bold block">Sec {section.number}</span>
