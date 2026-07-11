@@ -1,16 +1,16 @@
 # Product Requirements Document (PRD)
-## UniScheduler — Schedule Builder & PDF Export Platform
+## Horarios Utec — Schedule Builder & PDF Export Platform
 
-**Version**: 1.0  
+**Version**: 2.0  
 **Date**: May 2026  
-**Status**: Production Ready  
-**Deployment Target**: Vercel (Static Site + Optional Edge Functions)
+**Status**: MVP 
+**Deployment Target**: Vercel 
 
 ---
 
 ## 1. Executive Summary
 
-**UniScheduler** is a student-friendly schedule builder that transforms how UTEC (Universidad Tecnológica de El Salvador) students construct their weekly course timetables.
+**Horarios Utec** is a student-friendly schedule builder that transforms how UTEC (Universidad Tecnológica de El Salvador) students construct their weekly course timetables.
 
 ### Problem Statement
 Students at UTEC receive a PDF "hoja de asesorías" (advisory sheet) listing all available courses, sections, days, and times for the academic cycle. Currently, they must manually cross-reference sections to avoid time conflicts and visualize their schedule. This is error-prone, time-consuming, and unintuitive.
@@ -103,6 +103,7 @@ Students complete schedule construction in **5–10 minutes** (vs. 30+ minutes m
   - If table structure is unrecognized → show error message, suggest manual entry
   - If parse fails for a single row → warn user, skip row, continue
 - **Output**: Array of Course objects with Sections
+- **Worker configuration**: pdfjs-dist worker MUST be bundled locally via Vite's `?url` import syntax. NO CDN loading. Prevents "error loading dynamically imported module" failures.
 
 ### 3.3 Course & Section Management
 #### Data Model
@@ -166,34 +167,25 @@ ScheduleItem {
   - Section remains unselected (not added)
   - Suggestion: Try a different section
 
-### 3.5 Export to PDF
+### 3.5 Export to PDF (MVP — simplified)
 #### Export Dialog
-- **Theme selector**: 
-  - Light (default)
-  - Dark
-  - Colorful
-- **Primary color picker**:
-  - Preset colors: blue, green, purple, orange, red, indigo
-  - Custom hex input (optional)
-- **Content options**:
-  - Include course codes ✓
-  - Include aula/room ✓
-  - Include matrícula (optional)
-- **Preview**: Real-time preview of the weekly grid with selected theme
+- **Single button**: "Descargar PDF" triggers download immediately
+- **No theme selector, no color picker, no preview** (future enhancement)
+- Colors default to UTEC brand palette
 
 #### PDF Generation
 - **Layout**:
-  - Header: "Mi Horario" + student info (if available)
+  - Header: "Mi Horario" + generation date
   - Weekly grid (Mon–Sun, 06:00–22:00, 30-min blocks)
-  - Color-coded schedule items (using theme + primary color)
+  - Color-coded schedule items (UTEC brand colors)
   - Legend: course codes + room assignments
-  - Footer: Generated date, "Built with UniScheduler"
+  - Footer: Generated date, "Built with Horarios Utec"
 - **Size**: A4 landscape
-- **Font**: Clean, readable (e.g., Inter, Helvetica)
+- **Font**: Clean, readable (sans-serif)
 - **Accessibility**: High contrast for readability
 
 #### Download
-- **Filename**: `mi-horario-[date].pdf` (e.g., `mi-horario-2026-05-09.pdf`)
+- **Filename**: `mi-horario-[date].pdf` (e.g., `mi-horario-2026-07-10.pdf`)
 - **Button**: "Descargar PDF"
 
 ---
@@ -255,11 +247,11 @@ ScheduleItem {
 ### 5.1 Stack
 - **Frontend**: React 19 + Vite 7
 - **Styling**: Tailwind CSS 4
-- **Routing**: React Router 7 (if multi-page)
+- **Routing**: React Router 7
 - **State**: Context API (ScheduleContext)
-- **PDF Parsing**: pdfjs-dist (or pdf-parse for node if needed)
-- **PDF Generation**: jsPDF + html2canvas (or similar)
-- **Deployment**: Vercel (Static Site + Edge Functions for any server-side needs)
+- **PDF Parsing**: pdfjs-dist (worker bundled locally via Vite `?url` import — NO CDN)
+- **PDF Generation**: jsPDF (MVP uses simple layout, no html2canvas)
+- **Deployment**: Vercel (Static SPA — no server-side needed)
 
 ### 5.2 Project Structure
 ```
@@ -271,7 +263,7 @@ src/
 │   │   ├── CourseAccordion.jsx
 │   │   ├── WeeklyGrid.jsx
 │   │   └── ConflictDetector.jsx (logic, not UI)
-│   ├── PDFExporter.jsx      # Theme selector, preview, download
+│   ├── PDFExporter.jsx      # Generate & download PDF (simplified MVP)
 │   └── ErrorBoundary.jsx    # React error fallback
 ├── context/
 │   └── ScheduleContext.jsx  # State: courses, schedule, dispatch
@@ -343,16 +335,15 @@ src/
 
 ### Story 4: Export to PDF
 **As a** student  
-**I want to** download my schedule as a PDF with custom theme and color  
+**I want to** download my schedule as a PDF  
 **So that** I can print it, email it, or keep it as a record
 
 **Acceptance Criteria**:
-- [ ] "Export as PDF" button opens a dialog
-- [ ] User can select a theme (Light, Dark, Colorful)
-- [ ] User can pick a primary color (preset or custom hex)
-- [ ] Preview shows the themed schedule
-- [ ] "Descargar PDF" button downloads the file
-- [ ] PDF is readable, professional, and printable
+- [ ] "Descargar PDF" button downloads the schedule immediately
+- [ ] PDF is A4 landscape, readable, and printable
+- [ ] Header shows "Mi Horario" + generation date
+- [ ] Courses are color-coded with UTEC brand colors
+- [ ] Legend includes course codes and rooms
 
 ### Story 5: Data Persistence
 **As a** student  
@@ -376,6 +367,8 @@ src/
 6. **Real-time conflict warnings**: Warnings appear on click only
 7. **Notifications**: No email, SMS, or calendar invites
 8. **Analytics**: No user tracking (privacy-first)
+9. **PDF themes & customization**: Color picker, theme selector (Light/Dark/Colorful), and PDF preview are future enhancements
+10. **Export content options**: Toggle matrícula on/off in PDF, include/exclude rooms — deferred
 
 ---
 
@@ -392,27 +385,28 @@ src/
 
 ## 9. Timeline & Phases
 
-### Phase 1: MVP (Weeks 1–2)
-- Landing page
-- Manual course entry (no PDF upload yet)
-- Schedule builder with conflict detection
-- Weekly grid visualization
+### Phase 1: Foundation + PDF Parsing (prioritario)
+- Configurar worker de pdfjs-dist localmente (no CDN)
+- Landing page funcional con upload y entrada manual
+- PDF upload + parseo completo de hoja de asesorías
+- Testear con hoja_asesorias_example.pdf
 
-### Phase 2: PDF Parsing (Week 3)
-- PDF upload component
-- PDF parsing logic
-- Auto-population of courses from PDF
+### Phase 2: Schedule Builder
+- Course accordion en panel izquierdo
+- Weekly grid en panel derecho (Mon–Sun, 06:00–22:00)
+- Conflict detection en tiempo real (toast notifications con sonner)
+- Agregar/quitar materias del horario
 
-### Phase 3: Export & Polish (Week 4)
-- PDF export with themes
-- Error handling & UX refinement
-- Accessibility audit
-- Performance optimization
+### Phase 3: PDF Export
+- Exportar horario a PDF (A4 landscape, jsPDF)
+- Información clara, colores UTEC por defecto
+- Nombre de archivo: mi-horario-[fecha].pdf
 
-### Phase 4: Deployment (Week 5)
-- Deploy to Vercel
-- CI/CD setup
-- Monitoring & error logging
+### Phase 4: Polish + Deploy
+- Deploy a Vercel (static SPA)
+- Error handling y edge cases
+- Pruebas con compañeros de la UTEC
+- Feedback loop para ajustar parseo según PDFs reales
 
 ---
 
@@ -426,6 +420,7 @@ src/
 | Mobile UX: grid too small on phone | Medium | Medium | Responsive design; consider vertical layout on mobile; zoom/scroll |
 | Performance: PDF generation slow | Low | Medium | Optimize jsPDF usage; lazy-load PDF library |
 | Accessibility not met | Low | Medium | WCAG audit before launch; keyboard navigation tests |
+| **pdfjs-dist worker fails to load** | **Medium** | **High** | Bundle worker locally via Vite `?url` import; never depend on CDN |
 
 ---
 
@@ -468,22 +463,17 @@ On OK:
   WeeklyGrid re-renders with new block
 ```
 
-### PDF Export
+### PDF Export (MVP)
 ```
-User opens export dialog
-   ↓
-Selects theme "Dark" + primary color "purple"
-   ↓
-PDFExporter.preview() shows themed grid
-   ↓
 User clicks "Descargar PDF"
    ↓
-pdfGenerator.createPDF(schedule, theme, primaryColor)
-  - Render 7-day grid with colors
+PDFExporter.createPDF(schedule)
+  - Render 7-day grid with UTEC brand colors
   - Add legend (course codes, rooms)
-  - Add header & footer
+  - Add header: "Mi Horario" + date
+  - Add footer
    ↓
-jsPDF download: `mi-horario-2026-05-09.pdf`
+jsPDF download: `mi-horario-2026-07-10.pdf`
 ```
 
 ---

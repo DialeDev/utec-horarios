@@ -153,7 +153,7 @@ export function generatePDF(schedule, theme = 'light', color = '#2563eb', opts =
       doc.setTextColor(themeColors.text);
       
       // Truncate subject name if too long
-      const name = item.subjectName.length > 15 ? item.subjectName.substring(0, 14) + '...' : item.subjectName;
+      const name = item.name.length > 15 ? item.name.substring(0, 14) + '...' : item.name;
       doc.text(name, x + 2, y + 4);
       
       // Time

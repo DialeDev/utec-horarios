@@ -143,7 +143,7 @@ export default function WeeklyView() {
                     }}
                   >
                     <div className="text-[10px] font-bold text-blue-800 truncate">
-                      {item.subjectName}
+                      {item.name}
                     </div>
                     <div className="text-[9px] text-blue-600 truncate">
                       {item.time}

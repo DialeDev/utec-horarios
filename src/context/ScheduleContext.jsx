@@ -41,14 +41,7 @@ export function ScheduleProvider({ children }) {
   };
 
   const deleteSubject = (id) => {
-    // Primero limpiamos cualquier sección de esta materia que esté en el horario
-    setSchedule(prev => prev.filter(item => {
-        const subjectToDelete = subjects.find(s => s.id === id);
-        // Si la materia existe y coincide el código/nombre, la removemos del horario también
-        // (Mejor enfoque: filtrar si el item no pertenece a la materia eliminada, 
-        // pero como schedule guarda copias planas, lo ideal es limpiar por código si es único)
-        return true; 
-    }));
+    setSchedule(prev => prev.filter(item => item.courseId !== id));
     setSubjects(prev => prev.filter(sub => sub.id !== id));
   };
 
@@ -91,15 +84,17 @@ export function ScheduleProvider({ children }) {
       if (conflict) {
         return { 
           success: false, 
-          error: `Conflicto con ${conflict.subjectName} (${conflict.days} ${conflict.time})` 
+          error: `Conflicto con ${conflict.name} (${conflict.days} ${conflict.time}). Prueba con otra sección.` 
         };
       }
 
       setSchedule(prev => [
         ...prev, 
         { 
+          id: crypto.randomUUID(),
+          courseId: subject.id,
           sectionId: section.id,
-          subjectName: subject.name, // Asegúrate de pasar el nombre correcto al actualizar
+          name: subject.name,
           code: subject.code,
           ...section 
         }

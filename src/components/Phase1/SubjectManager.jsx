@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useSchedule } from '../../context/ScheduleContext';
+import { toast } from 'sonner';
 
 export default function SubjectManager() {
   const { addSubject, updateSubject, deleteSubject, subjects } = useSchedule();
@@ -39,7 +40,7 @@ export default function SubjectManager() {
   const handleSaveSubject = (e) => {
     e.preventDefault();
     if (!form.name || form.sections.length === 0) {
-      alert("Debes agregar nombre y al menos una sección");
+      toast.error("Debes agregar nombre y al menos una sección");
       return;
     }
 
@@ -68,12 +69,17 @@ export default function SubjectManager() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleDeleteClick = (id) => {
-    if (confirm('¿Estás seguro de eliminar esta materia?')) {
-      deleteSubject(id);
-      // Si estábamos editando justo esa materia, limpiar el form
-      if (form.id === id) resetForm();
-    }
+  const handleDeleteClick = (id, name) => {
+    toast(`¿Eliminar "${name}"?`, {
+      action: {
+        label: 'Sí, eliminar',
+        onClick: () => {
+          deleteSubject(id);
+          if (form.id === id) resetForm();
+        }
+      },
+      duration: 5000,
+    });
   };
 
   return (
@@ -192,7 +198,7 @@ export default function SubjectManager() {
                     ✏️
                   </button>
                   <button 
-                    onClick={() => handleDeleteClick(sub.id)}
+                    onClick={() => handleDeleteClick(sub.id, sub.name)}
                     className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
                     title="Eliminar"
                   >

@@ -21,7 +21,7 @@ export async function parsePDF(file) {
   }
 
   const warnings = [];
-  const courses = parseTableRows(fullText);
+  const courses = parseTableRows(fullText, warnings);
 
   if (courses.length === 0) {
     warnings.push('No se encontraron materias en el PDF. Verifica que sea la hoja de asesorías de UTEC.');
@@ -31,84 +31,141 @@ export async function parsePDF(file) {
 }
 
 /**
- * Parse table rows from extracted text
+ * Day name mapping: abbreviated forms → canonical 3-letter forms
+ */
+const DAY_ABBREVIATIONS = {
+  'Lu': 'Lu', 'Ma': 'Ma', 'Mi': 'Mie', 'Mie': 'Mie',
+  'Ju': 'Ju', 'Vi': 'Vi', 'Sa': 'Sab', 'Sab': 'Sab', 'Do': 'Dom', 'Dom': 'Dom'
+};
+
+const DAY_ORDER = ['Lu', 'Ma', 'Mie', 'Ju', 'Vi', 'Sab', 'Dom'];
+
+/**
+ * Parse day range strings like "Ma-Ju" or "Mie-Sab" into canonical form
+ */
+function normalizeDays(daysStr) {
+  if (!daysStr) return '';
+  const trimmed = daysStr.trim();
+  if (trimmed.includes('-')) {
+    const [start, end] = trimmed.split('-');
+    const s = DAY_ABBREVIATIONS[start] || start;
+    const e = DAY_ABBREVIATIONS[end] || end;
+    const si = DAY_ORDER.indexOf(s);
+    const ei = DAY_ORDER.indexOf(e);
+    if (si !== -1 && ei !== -1 && si <= ei) {
+      return DAY_ORDER.slice(si, ei + 1).join('-');
+    }
+  }
+  // Try to normalize single day aliases
+  return DAY_ABBREVIATIONS[trimmed] || trimmed;
+}
+
+/**
+ * Parse table rows from extracted PDF text using time-anchored strategy
  * @param {string} text - Full PDF text
+ * @param {string[]} warnings - Warning array to push into
  * @returns {Array} - Array of Course objects
  */
-function parseTableRows(text) {
+function parseTableRows(text, warnings) {
   const courses = [];
-  
-  // UTEC PDF pattern: Ciclo Código Materia Sección Días Hora Salon
-  // Example: 2025-1 INF281 Estructura de Datos 1 Lu-Ju 07:00-09:00 LAB-203
-  
-  // Match course rows (Ciclo XX-X CODE NAME SECTION DAY TIME ROOM)
-  const rowPattern = /(\d{4}[-]\d)\s+([A-Z]{3,4}\d{3})\s+([A-Za-zÀ-ÿ\s]+?)\s+(\d+)\s+([A-Za-zÀ-ÿ\-]+)\s+(\d{1,2}:\d{2}[-]\d{1,2}:\d{2})\s*([A-Z]*[-\d]*)?/g;
-  
-  let match;
   const seenCourses = new Map();
   
-  while ((match = rowPattern.exec(text)) !== null) {
-    const [, ciclo, code, name, section, days, time, room] = match;
+  // Find all time anchors (HH:MM-HH:MM)
+  const timePattern = /\b(\d{1,2}:\d{2}-\d{1,2}:\d{2})\b/g;
+  const codePattern = /^[A-Z0-9]{2,}(?:-[A-Z0-9]{1,3})?$/;
+  
+  let timeMatch;
+  let searchPos = 0;
+  
+  while ((timeMatch = timePattern.exec(text)) !== null) {
+    const timeStr = timeMatch[1];
+    const timeIdx = timeMatch.index;
     
-    const courseCode = code.trim();
-    const normalized = normalizeSection({ days, time, room: room || 'EN LINEA' });
+    // Get text before time (about 150 chars back)
+    const beforeStart = Math.max(0, timeIdx - 150);
+    const beforeText = text.slice(beforeStart, timeIdx).trim();
     
-    if (!seenCourses.has(courseCode)) {
-      seenCourses.set(courseCode, {
+    // Get text after time (about 50 chars forward)
+    const afterEnd = Math.min(text.length, timeIdx + timeStr.length + 50);
+    const afterText = text.slice(timeIdx + timeStr.length, afterEnd).trim();
+    
+    // Parse backwards from the end of beforeText
+    // Expected structure: ... CODE    NAME    SECTION    MATRICULA    DAYS
+    // Where DAYS immediately precedes the time
+    
+    // Split beforeText into tokens
+    const tokens = beforeText.split(/\s+/).filter(t => t.length > 0);
+    
+    if (tokens.length < 4) continue;
+    
+    // The last token before time should be days (e.g., "Ma-Ju", "Lu-Vi", "Sab")
+    const daysCandidate = tokens[tokens.length - 1];
+    
+    // The second-to-last should be matricula (single digit)
+    const matriculaCandidate = tokens[tokens.length - 2];
+    
+    // The third-to-last should be section number
+    const sectionCandidate = tokens[tokens.length - 3];
+    
+    // Everything before that is CODE + NAME (variable length)
+    // Find the code: look for a pattern like AAA-NN or AAANNN at the start
+    let code = '';
+    let nameStartIdx = 0;
+    
+    for (let i = 0; i < Math.min(tokens.length - 3, 5); i++) {
+      const candidate = tokens[i];
+      if (/^[A-Z0-9]{2,}(?:-[A-Z0-9]{1,3})?$/.test(candidate) && !/^\d+$/.test(candidate)) {
+        code = candidate;
+        nameStartIdx = i + 1;
+        break;
+      }
+    }
+    
+    if (!code) {
+      warnings.push(`Fila ignorada: no se pudo identificar código de materia cerca de "${beforeText.slice(-60)}"`);
+      continue;
+    }
+    
+    // Everything between code and section is the course name
+    const nameTokens = tokens.slice(nameStartIdx, tokens.length - 3);
+    if (nameTokens.length === 0) {
+      warnings.push(`Fila ignorada: sin nombre para materia ${code}`);
+      continue;
+    }
+    const name = nameTokens.join(' ');
+    const section = sectionCandidate;
+    
+    // Validate section is a number
+    if (!/^\d+$/.test(section)) {
+      continue;
+    }
+    
+    // Parse room from afterText
+    const room = afterText.replace(/\s+/g, ' ').trim() || 'EN LINEA';
+    
+    // Normalize days
+    const formattedDays = normalizeDays(daysCandidate);
+    
+    // Create or update course
+    if (!seenCourses.has(code)) {
+      seenCourses.set(code, {
         id: crypto.randomUUID(),
-        code: courseCode,
-        name: name.trim(),
-        ciclo,
+        code,
+        name,
         sections: []
       });
     }
     
-    const course = seenCourses.get(courseCode);
+    const course = seenCourses.get(code);
     course.sections.push({
       id: crypto.randomUUID(),
       number: section,
-      ...normalized
+      days: formattedDays,
+      time: timeStr,
+      room,
+      matricula: matriculaCandidate
     });
   }
   
   return Array.from(seenCourses.values());
-}
-
-/**
- * Normalize section data
- * @param {Object} row - Raw section data
- * @returns {Object} - Normalized section
- */
-function normalizeSection(row) {
-  const { days, time, room } = row;
-  
-  // Normalize days to abbreviations (Lu, Ma, etc.) to match parseDays expectations
-  // Handle ranges like "Lu-Ju" or "Ma-Vi"
-  let normalizedDays;
-  if (days.includes('-')) {
-    const [start, end] = days.split('-');
-    const startIdx = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'].indexOf(start);
-    const endIdx = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'].indexOf(end);
-    const dayKeys = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa', 'Do'];
-    normalizedDays = dayKeys.slice(startIdx, endIdx + 1).join('-');
-  } else {
-    normalizedDays = days;
-  }
-  
-  // Normalize time (already in HH:MM-HH:MM format)
-  const timeMatch = time.match(/(\d{1,2}):(\d{2})[-](\d{1,2}):(\d{2})/);
-  let normalizedTime = time;
-  if (timeMatch) {
-    const [, startH, startM, endH, endM] = timeMatch;
-    const start = parseInt(startH) * 60 + parseInt(startM);
-    const end = parseInt(endH) * 60 + parseInt(endM);
-    normalizedTime = `${startH.padStart(2, '0')}:${startM}-${endH.padStart(2, '0')}:${endM}`;
-  }
-  
-  return {
-    days: normalizedDays,
-    time: normalizedTime,
-    room: room.trim() || 'EN LINEA',
-    matricula: ''
-  };
 }
