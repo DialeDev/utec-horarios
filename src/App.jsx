@@ -15,8 +15,8 @@ export default function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<Landing />} />
-            <Route path="subjects" element={<SubjectManager />} />
-            <Route path="builder" element={<ScheduleBuilder />} />
+            <Route path="materias" element={<SubjectManager />} />
+            <Route path="horario" element={<ScheduleBuilder />} />
           </Route>
         </Routes>
       </ScheduleProvider>

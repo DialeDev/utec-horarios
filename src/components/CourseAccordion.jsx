@@ -10,19 +10,19 @@ function SectionButton({ section, status, onClick }) {
       onClick={onClick}
       className={`w-full text-left p-2 rounded text-xs flex justify-between items-center border ${
         status === 'selected'
-          ? 'bg-green-50 border-green-300'
+          ? 'bg-green-100 border-green-300 text-green-800'
           : status === 'conflicted'
-            ? 'bg-red-50 border-red-200 text-red-600'
-            : 'bg-white border-slate-200 text-slate-600 hover:border-blue-300'
+            ? 'bg-red-100 border-red-200 text-red-700'
+            : 'bg-white border-slate-200 text-slate-700 hover:border-blue-300'
       }`}
     >
       <div className="flex items-center gap-2 min-w-0">
         <span className={`shrink-0 text-sm font-bold ${
-          status === 'selected' ? 'text-green-600' :
-          status === 'conflicted' ? 'text-red-500' :
-          'text-slate-300'
+          status === 'selected' ? 'text-green-700' :
+          status === 'conflicted' ? 'text-red-600' :
+          'text-slate-400'
         }`}>
-          {status === 'selected' ? <FiCheck size={16} className="text-green-600" /> : status === 'conflicted' ? <FiX size={16} className="text-red-500" /> : <FiCircle size={16} className="text-slate-300" />}
+          {status === 'selected' ? <FiCheck size={16} className="text-green-700" /> : status === 'conflicted' ? <FiX size={16} className="text-red-600" /> : <FiCircle size={16} className="text-slate-400" />}
         </span>
         <div>
           <span className="font-bold block">Sec {section.number}</span>
@@ -30,8 +30,8 @@ function SectionButton({ section, status, onClick }) {
         </div>
       </div>
       <div className="text-right shrink-0">
-        <span className="block font-mono">{section.time}</span>
-        <span className="text-[10px] opacity-75">{section.room}</span>
+          <span className="block font-mono">{section.time}</span>
+          <span className="text-[10px] text-slate-500">{section.room}</span>
       </div>
     </button>
   );
@@ -71,7 +71,7 @@ export default function CourseAccordion() {
         <div className="p-3 lg:p-4 border-b border-slate-100">
           <h2 className="font-bold text-slate-700 text-sm lg:text-base">Materias</h2>
         </div>
-        <div className="hidden lg:flex flex-1 items-center justify-center p-4 text-sm text-slate-400">
+        <div className="hidden lg:flex flex-1 items-center justify-center p-4 text-sm text-slate-500">
           No hay materias. Subí un PDF o ingresalas manualmente.
         </div>
       </div>
@@ -83,7 +83,7 @@ export default function CourseAccordion() {
       {/* Header */}
       <div className="p-3 lg:p-4 border-b border-slate-100 flex justify-between items-center lg:block">
         <h2 className="font-bold text-slate-700 text-sm lg:text-base">Materias</h2>
-        <span className="text-xs text-slate-400 lg:hidden">{subjects.length} materias</span>
+        <span className="text-xs text-slate-500 lg:hidden">{subjects.length} materias</span>
       </div>
 
       {/* Subject list: horizontal scroll en mobile, vertical accordion en desktop */}
@@ -102,21 +102,21 @@ export default function CourseAccordion() {
               `}
             >
               <div className="font-semibold text-xs lg:text-sm text-slate-800 truncate">{subject.name}</div>
-              <div className="text-[10px] lg:text-xs text-slate-400">{subject.code}</div>
+              <div className="text-[10px] lg:text-xs text-slate-500">{subject.code}</div>
               {/* Desktop: count + chevron */}
               <div className="hidden lg:flex items-center justify-between mt-0.5">
-                <span className="text-[10px] text-slate-300">{subject.sections.length} secciones</span>
-                <span className="text-slate-400">{openSubjectId === subject.id ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}</span>
+                <span className="text-[10px] text-slate-500">{subject.sections.length} secciones</span>
+                <span className="text-slate-500">{openSubjectId === subject.id ? <FiChevronUp size={14} /> : <FiChevronDown size={14} />}</span>
               </div>
               {/* Mobile: mini section badges */}
               <div className="lg:hidden mt-1 flex flex-wrap gap-0.5">
                 {subject.sections.slice(0, 3).map(s => (
-                  <span key={s.id} className={`text-[9px] px-1 py-px rounded border ${isSectionSelected(s.id) ? 'bg-green-100 border-green-300 text-green-700' : 'bg-slate-100 border-slate-200 text-slate-500'}`}>
+                  <span key={s.id} className={`text-[9px] px-1 py-px rounded border ${isSectionSelected(s.id) ? 'bg-green-200 border-green-400 text-green-800' : 'bg-slate-100 border-slate-300 text-slate-600'}`}>
                     {s.number}
                   </span>
                 ))}
                 {subject.sections.length > 3 && (
-                  <span className="text-[9px] text-slate-400">+{subject.sections.length - 3}</span>
+                  <span className="text-[9px] text-slate-500">+{subject.sections.length - 3}</span>
                 )}
               </div>
             </button>
@@ -141,7 +141,7 @@ export default function CourseAccordion() {
       {/* Mobile: sections panel for selected subject */}
       {openSubject && (
         <div className="lg:hidden border-t border-slate-200 p-2 space-y-1 max-h-36 overflow-y-auto">
-          <p className="text-[10px] font-bold text-slate-400 uppercase mb-1">{openSubject.name}</p>
+          <p className="text-[10px] font-bold text-slate-500 uppercase mb-1">{openSubject.name}</p>
           {openSubject.sections.map(section => (
             <SectionButton
               key={section.id}

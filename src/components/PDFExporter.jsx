@@ -1,4 +1,4 @@
-import { generatePDF, downloadPDF } from '../utils/pdfGenerator';
+import { ReporteGenerator, downloadPDF } from '../utils/pdfGenerator';
 import { useSchedule } from '../context/ScheduleContext';
 
 export default function PDFExporter() {
@@ -8,7 +8,7 @@ export default function PDFExporter() {
     if (schedule.length === 0) {
       return;
     }
-    const blob = generatePDF(schedule);
+    const blob = ReporteGenerator.generarHorarioPDF(schedule);
     downloadPDF(blob);
   };
 

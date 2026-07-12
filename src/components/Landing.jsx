@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useSchedule } from '../context/ScheduleContext';
 import PDFUploader from './PDFUploader';
-import { FiCalendar, FiFile, FiEdit2 } from 'react-icons/fi';
+import { FiCalendar, FiFile, FiEdit2, FiGithub } from 'react-icons/fi';
 
 export default function Landing() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ export default function Landing() {
 
   const handleManualStart = () => {
     resetSubjects([]);
-    navigate('/subjects');
+    navigate('/materias');
   };
 
   return (
@@ -18,7 +18,7 @@ export default function Landing() {
         {/* Hero Section */}
         <div className="space-y-4">
           <h1 className="text-4xl font-bold text-slate-800 flex items-center justify-center gap-3">
-            <FiCalendar className="text-blue-600" /> Horarios Utec
+            <FiCalendar className="text-blue-600" /> Horarios UTEC
           </h1>
           <p className="text-lg text-slate-600">
             Construye tu horario académico de forma rápida y sencilla
@@ -28,38 +28,42 @@ export default function Landing() {
         {/* Action Buttons */}
         <div className="grid md:grid-cols-2 gap-4">
           {/* PDF Upload */}
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow flex flex-col">
             <div className="text-4xl mb-4"><FiFile className="inline-block text-slate-600" size={48} /></div>
             <h2 className="text-xl font-bold text-slate-800 mb-2">
               Subir Hoja de Asesorías
             </h2>
-            <p className="text-sm text-slate-500 mb-4">
+            <p className="text-sm text-slate-500 mb-6">
               Importa tu horario directamente desde el PDF de UTEC
             </p>
-            <PDFUploader onParseSuccess={(result) => {
-              resetSubjects(result.courses);
-              navigate('/builder');
-            }} />
+            <div className="mt-auto flex justify-center">
+              <PDFUploader onParseSuccess={(result) => {
+                resetSubjects(result.courses);
+                navigate('/horario');
+              }} />
+            </div>
           </div>
 
           {/* Manual Entry */}
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow">
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow flex flex-col">
             <div className="text-4xl mb-4"><FiEdit2 className="inline-block text-slate-600" size={48} /></div>
             <h2 className="text-xl font-bold text-slate-800 mb-2">
               Ingresar Manualmente
             </h2>
-            <p className="text-sm text-slate-500 mb-4">
+            <p className="text-sm text-slate-500 mb-6">
               Agrega tus materias una por una
             </p>
-            <button
-              onClick={handleManualStart}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              Comenzar
-            </button>
+            <div className="mt-auto flex justify-center">
+              <button
+                onClick={handleManualStart}
+                className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium w-full"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+                Comenzar
+              </button>
+            </div>
           </div>
         </div>
 
@@ -90,6 +94,19 @@ export default function Landing() {
             </li>
           </ol>
         </div>
+
+        {/* Footer */}
+        <footer className="pt-8 border-t border-slate-200">
+          <a
+            href="https://github.com/DialeDev/utec-horarios/issues"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+          >
+            <FiGithub className="text-lg" />
+            ¿Tienes algún problema? Repórtalo aquí
+          </a>
+        </footer>
 
       </div>
     </div>

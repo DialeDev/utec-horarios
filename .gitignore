@@ -24,6 +24,19 @@ dist-ssr
 *.sw?
 .atl/
 
+# Environment files (contain secrets, NEVER commit)
+.env
+.env.*
+
+# Vite cache
+.vite/
+
+# Coverage
+coverage/
+
+# ESLint cache
+.eslintcache
+
 # Project artifacts
 PRD.md
 AGENTS.md

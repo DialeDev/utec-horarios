@@ -15,11 +15,14 @@ export default function Layout() {
     <div className="min-h-screen flex flex-col">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <h1 className="text-xl font-bold text-slate-800 flex items-center gap-2"><FiCalendar className="text-blue-600" /> Horarios Utec</h1>
+          <Link to="/" className="text-xl font-bold text-slate-800 flex items-center gap-2 hover:text-blue-600 transition-colors">
+            <FiCalendar className="text-blue-600" />
+            <span className="hidden sm:inline">Horarios UTEC</span>
+          </Link>
           <nav className="flex gap-2">
             <Link to="/" className={navClass('/')}>Inicio</Link>
-            <Link to="/subjects" className={navClass('/subjects')}>Materias</Link>
-            <Link to="/builder" className={navClass('/builder')}>Horario</Link>
+            <Link to="/materias" className={navClass('/materias')}>Materias</Link>
+            <Link to="/horario" className={navClass('/horario')}>Horario</Link>
           </nav>
         </div>
       </header>

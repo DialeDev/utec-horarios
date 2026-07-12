@@ -38,7 +38,7 @@ export default function WeeklyGrid() {
       .sort((a, b) => parseTimeRange(a.time).start - parseTimeRange(b.time).start);
   };
 
-  const totalRows = Math.floor((TIME_END - TIME_START) / SLOT_MINUTES) + 1;
+  const totalRows = Math.floor((TIME_END - TIME_START) / SLOT_MINUTES);
 
   return (
     <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden flex flex-col h-full">
@@ -58,7 +58,7 @@ export default function WeeklyGrid() {
             gridTemplateRows: `auto repeat(${totalRows}, ${ROW_HEIGHT}px)` 
           }}
         >
-          <div className="bg-slate-100 border-b border-slate-200 sticky left-0" style={{ zIndex: 20 }}></div>
+          <div className="bg-slate-100 border-b border-slate-200 left-0"></div>
           
           {DAYS.map(day => (
             <div key={day} className="bg-slate-100 py-2 text-center text-[10px] sm:text-sm font-bold text-slate-600 border-b border-l border-slate-200">
@@ -66,13 +66,13 @@ export default function WeeklyGrid() {
             </div>
           ))}
           
-          <div className="sticky left-0 z-10 bg-slate-50 relative" style={{ gridRow: '2 / -1' }}>
+          <div className="sticky left-0 z-10 bg-slate-50 relative overflow-hidden" style={{ gridRow: '2 / -1' }}>
             {TIME_LABELS.map((label, idx) => (
               <div 
                 key={idx} 
                 className="text-[10px] text-slate-400 text-right pr-1.5 border-r border-slate-100 absolute left-0 right-0"
                 style={{ 
-                  top: `${idx * 2 * ROW_HEIGHT}px`,
+                  top: `${idx * 2 * ROW_HEIGHT + (idx === 0 ? 8 : 0)}px`,
                   height: `${ROW_HEIGHT * 2}px`
                 }}
               >
