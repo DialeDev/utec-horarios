@@ -12,23 +12,17 @@ const DAY_ABBREVIATIONS = {
   'Ju': 'Ju', 'Vi': 'Vi', 'Sa': 'Sab', 'Sab': 'Sab', 'Do': 'Dom', 'Dom': 'Dom'
 };
 
-const DAY_ORDER = ['Lu', 'Ma', 'Mie', 'Ju', 'Vi', 'Sab', 'Dom'];
-
 /**
- * Parse day range strings like "Ma-Ju" or "Mie-Sab" into canonical form
+ * Normalize day abbreviations: "Ma-Ju" → "Ma-Ju" (cada uno es un día explícito, no un rango)
+ * "Mi-Ju" → "Mie-Ju" (normaliza alias pero no interpola días intermedios)
  */
 function normalizeDays(daysStr) {
   if (!daysStr) return '';
   const trimmed = daysStr.trim();
   if (trimmed.includes('-')) {
-    const [start, end] = trimmed.split('-');
-    const s = DAY_ABBREVIATIONS[start] || start;
-    const e = DAY_ABBREVIATIONS[end] || end;
-    const si = DAY_ORDER.indexOf(s);
-    const ei = DAY_ORDER.indexOf(e);
-    if (si !== -1 && ei !== -1 && si <= ei) {
-      return DAY_ORDER.slice(si, ei + 1).join('-');
-    }
+    return trimmed.split('-')
+      .map(token => DAY_ABBREVIATIONS[token] || token)
+      .join('-');
   }
   return DAY_ABBREVIATIONS[trimmed] || trimmed;
 }

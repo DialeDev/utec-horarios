@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { useSchedule } from '../context/ScheduleContext';
 import { parseDays, parseTimeRange } from '../utils/time';
 
@@ -6,6 +5,7 @@ const DAYS = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', '
 const TIME_START = 6 * 60;
 const TIME_END = 22 * 60;
 const SLOT_MINUTES = 30;
+const ROW_HEIGHT = 48; // px por slot de 30 min — generoso para distinguir medias horas
 
 const TIME_LABELS = [];
 for (let mins = TIME_START; mins <= TIME_END; mins += 60) {
@@ -13,9 +13,13 @@ for (let mins = TIME_START; mins <= TIME_END; mins += 60) {
   TIME_LABELS.push(`${h.toString().padStart(2, '0')}:00`);
 }
 
+const formatRoom = (room) => {
+  if (!room || room.toUpperCase() === 'EN LINEA') return 'En Línea';
+  return room;
+};
+
 export default function WeeklyGrid() {
-  const { schedule, toggleSection } = useSchedule();
-  const [tooltip, setTooltip] = useState(null);
+  const { schedule, removeFromSchedule } = useSchedule();
 
   const getGridPosition = (timeStr) => {
     const { start, end } = parseTimeRange(timeStr);
@@ -46,24 +50,33 @@ export default function WeeklyGrid() {
         </div>
       </div>
       
-      <div className="flex-1 overflow-auto relative">
-        <div className="grid grid-cols-8 min-w-[900px]" style={{ gridTemplateRows: `auto repeat(${totalRows}, minmax(30px, 1fr))` }}>
-          <div className="bg-slate-100 border-b border-slate-200"></div>
+      <div className="flex-1 overflow-auto overscroll-contain">
+        <div 
+          className="grid min-w-[700px]"
+          style={{ 
+            gridTemplateColumns: `44px repeat(7, minmax(80px, 1fr))`,
+            gridTemplateRows: `auto repeat(${totalRows}, ${ROW_HEIGHT}px)` 
+          }}
+        >
+          <div className="bg-slate-100 border-b border-slate-200 sticky left-0" style={{ zIndex: 20 }}></div>
           
           {DAYS.map(day => (
-            <div key={day} className="bg-slate-100 py-2 text-center text-sm font-bold text-slate-600 border-b border-l border-slate-200">
+            <div key={day} className="bg-slate-100 py-2 text-center text-[10px] sm:text-sm font-bold text-slate-600 border-b border-l border-slate-200">
               {day}
             </div>
           ))}
           
-          <div className="relative">
+          <div className="sticky left-0 z-10 bg-slate-50 relative" style={{ gridRow: '2 / -1' }}>
             {TIME_LABELS.map((label, idx) => (
               <div 
                 key={idx} 
-                className="text-[10px] text-slate-400 text-right pr-2 border-r border-slate-100"
-                style={{ gridRow: idx + 2, height: '30px' }}
+                className="text-[10px] text-slate-400 text-right pr-1.5 border-r border-slate-100 absolute left-0 right-0"
+                style={{ 
+                  top: `${idx * 2 * ROW_HEIGHT}px`,
+                  height: `${ROW_HEIGHT * 2}px`
+                }}
               >
-                {label}
+                <span className="relative -top-2">{label}</span>
               </div>
             ))}
           </div>
@@ -72,10 +85,10 @@ export default function WeeklyGrid() {
             <div 
               key={day} 
               className="relative border-l border-slate-200"
-              style={{ gridColumn: DAYS.indexOf(day) + 2 }}
+              style={{ gridColumn: DAYS.indexOf(day) + 2, gridRow: '2 / -1' }}
             >
               {Array.from({ length: totalRows }, (_, i) => (
-                <div key={i} className="border-b border-slate-100" style={{ height: '30px' }} />
+                <div key={i} className="border-b border-slate-100" style={{ height: `${ROW_HEIGHT}px` }} />
               ))}
               
               {getClassesForDay(day).map((item) => {
@@ -83,24 +96,22 @@ export default function WeeklyGrid() {
                 return (
                   <div
                     key={`${item.sectionId}-${day}`}
-                    onClick={() => toggleSection({}, item)}
-                    onMouseEnter={(e) => setTooltip({ x: e.clientX, y: e.clientY, item })}
-                    onMouseLeave={() => setTooltip(null)}
-                    className="absolute left-1 right-1 cursor-pointer bg-blue-100 border border-blue-300 rounded-md p-1 hover:bg-red-100 hover:border-red-300 transition-all overflow-hidden z-10"
+                    onClick={() => removeFromSchedule(item.id)}
+                    className="absolute inset-x-0.5 cursor-pointer bg-blue-50 border border-blue-200 rounded-md p-1.5 hover:bg-red-50 hover:border-red-300 transition-all overflow-hidden z-10 flex flex-col"
                     style={{
-                      top: `${(rowStart - 2) * 30}px`,
-                      height: `${rowSpan * 30 - 2}px`,
+                      top: `${(rowStart - 2) * ROW_HEIGHT}px`,
+                      height: `${rowSpan * ROW_HEIGHT - 2}px`,
                     }}
                   >
-                    <div className="text-[10px] font-bold text-blue-800 truncate">
+                    <div className="text-[10px] font-bold text-blue-900 truncate leading-tight">
                       {item.name}
                     </div>
-                    <div className="text-[9px] text-blue-600 truncate">
+                    <div className="text-[9px] text-blue-900 truncate leading-tight">
                       {item.time}
                     </div>
-                    <div className="text-[8px] text-blue-500 truncate flex justify-between">
-                      <span>S{item.number}</span>
-                      <span>{item.room}</span>
+                    <div className="text-[8px] text-blue-900 truncate leading-tight mt-auto flex justify-between">
+                      <span>Sec {item.number}</span>
+                      <span>{formatRoom(item.room)}</span>
                     </div>
                   </div>
                 );
@@ -108,19 +119,6 @@ export default function WeeklyGrid() {
             </div>
           ))}
         </div>
-
-        {/* Tooltip */}
-        {tooltip && (
-          <div
-            className="fixed z-50 bg-slate-800 text-white text-xs rounded-lg px-3 py-2 shadow-lg pointer-events-none"
-            style={{ left: tooltip.x + 10, top: tooltip.y - 10 }}
-          >
-            <div className="font-bold">{tooltip.item.name}</div>
-            <div className="opacity-80">{tooltip.item.code} - Sec {tooltip.item.number}</div>
-            <div className="opacity-80">{tooltip.item.days} {tooltip.item.time}</div>
-            <div className="opacity-80">{tooltip.item.room}</div>
-          </div>
-        )}
       </div>
     </div>
   );

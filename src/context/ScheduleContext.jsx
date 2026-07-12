@@ -84,51 +84,66 @@ export function ScheduleProvider({ children }) {
 
   // --- ACCIONES FASE 2 (Gestión de Horario) ---
 
+  const removeFromSchedule = (id) => {
+    setSchedule(prev => prev.filter(item => item.id !== id));
+  };
+
   const toggleSection = (subject, section) => {
     const isSelected = schedule.some(item => item.sectionId === section.id);
 
     if (isSelected) {
       setSchedule(prev => prev.filter(item => item.sectionId !== section.id));
       return { success: true, action: 'removed' };
-    } else {
-      const newDays = parseDays(section.days);
-      const newTime = parseTimeRange(section.time);
-      
-      const conflict = schedule.find(existing => {
-        const existingDays = parseDays(existing.days);
-        const dayOverlap = newDays.some(d => existingDays.includes(d));
-        if (!dayOverlap) return false;
+    }
 
-        const existingTime = parseTimeRange(existing.time);
-        return checkTimeConflict(newTime, existingTime);
-      });
-
-      if (conflict) {
-        return { 
-          success: false, 
-          error: `Conflicto con ${conflict.name} (${conflict.days} ${conflict.time}). Prueba con otra sección.` 
+    // No permitir dos secciones de la misma materia
+    if (subject?.id) {
+      const existingSection = schedule.find(item => item.courseId === subject.id);
+      if (existingSection) {
+        return {
+          success: false,
+          error: `Ya tienes "${subject.name}" con la sección ${existingSection.number}. Elimínala primero para cambiar de sección.`
         };
       }
-
-      setSchedule(prev => [
-        ...prev, 
-        { 
-          ...section,
-          id: crypto.randomUUID(),
-          courseId: subject.id,
-          sectionId: section.id,
-          name: subject.name,
-          code: subject.code,
-        }
-      ]);
-      return { success: true, action: 'added' };
     }
+
+    const newDays = parseDays(section.days);
+    const newTime = parseTimeRange(section.time);
+    
+    const conflict = schedule.find(existing => {
+      const existingDays = parseDays(existing.days);
+      const dayOverlap = newDays.some(d => existingDays.includes(d));
+      if (!dayOverlap) return false;
+
+      const existingTime = parseTimeRange(existing.time);
+      return checkTimeConflict(newTime, existingTime);
+    });
+
+    if (conflict) {
+      return { 
+        success: false, 
+        error: `Conflicto con ${conflict.name} (${conflict.days} ${conflict.time}). Prueba con otra sección.` 
+      };
+    }
+
+    setSchedule(prev => [
+      ...prev, 
+      { 
+        ...section,
+        id: crypto.randomUUID(),
+        courseId: subject.id,
+        sectionId: section.id,
+        name: subject.name,
+        code: subject.code,
+      }
+    ]);
+    return { success: true, action: 'added' };
   };
 
   return (
     <ScheduleContext.Provider value={{ 
       subjects, addSubject, deleteSubject, updateSubject, resetSubjects,
-      schedule, toggleSection,
+      schedule, toggleSection, removeFromSchedule,
       exportPrefs, setExportPrefs
     }}>
       {children}
