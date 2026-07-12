@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { useSchedule } from '../../context/ScheduleContext';
 import { toast } from 'sonner';
-import { FiEdit2, FiTrash2, FiX } from 'react-icons/fi';
+import { FiEdit2, FiTrash2, FiX, FiAlertTriangle } from 'react-icons/fi';
 
 export default function SubjectManager() {
-  const { addSubject, updateSubject, deleteSubject, subjects } = useSchedule();
+  const { addSubject, updateSubject, deleteSubject, clearAll, subjects } = useSchedule();
   
   // Estado del formulario
   const [form, setForm] = useState({
@@ -13,6 +13,8 @@ export default function SubjectManager() {
     name: '', 
     sections: []
   });
+  
+  const [showClearModal, setShowClearModal] = useState(false);
   
   const [tempSection, setTempSection] = useState({
     number: '01', days: 'Lu, Vi', time: '06:30-08:00', room: 'EN LINEA'
@@ -176,9 +178,20 @@ export default function SubjectManager() {
 
       {/* COLUMNA DERECHA: LISTADO */}
       <div className="space-y-4">
-        <h2 className="text-lg font-semibold text-slate-700">
-          Materias Disponibles ({subjects.length})
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold text-slate-700">
+            Materias Disponibles ({subjects.length})
+          </h2>
+          {subjects.length > 0 && (
+            <button
+              onClick={() => setShowClearModal(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors"
+            >
+              <FiTrash2 size={14} />
+              Limpiar todo
+            </button>
+          )}
+        </div>
         
         {subjects.length === 0 ? (
           <div className="text-center p-8 text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-300">
@@ -233,6 +246,47 @@ export default function SubjectManager() {
           </div>
         )}
       </div>
+
+      {/* Modal de confirmación para limpiar todo */}
+      {showClearModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                <FiAlertTriangle className="text-red-600" size={20} />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-slate-800">Limpiar todas las materias</h3>
+                <p className="text-sm text-slate-500">
+                  Se eliminarán <strong>{subjects.length} materias</strong> y todas las secciones seleccionadas en el horario.
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+              Esta acción no se puede deshacer.
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowClearModal(false)}
+                className="flex-1 py-2.5 rounded-lg border border-slate-300 text-slate-700 font-medium text-sm hover:bg-slate-50 transition-colors"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={() => {
+                  clearAll();
+                  setShowClearModal(false);
+                }}
+                className="flex-1 py-2.5 rounded-lg bg-red-600 text-white font-medium text-sm hover:bg-red-700 transition-colors"
+              >
+                Sí, limpiar todo
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

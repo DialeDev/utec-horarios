@@ -140,10 +140,15 @@ export function ScheduleProvider({ children }) {
     return { success: true, action: 'added' };
   };
 
+  const clearAll = () => {
+    setSubjects([]);
+    setSchedule([]);
+  };
+
   return (
     <ScheduleContext.Provider value={{ 
       subjects, addSubject, deleteSubject, updateSubject, resetSubjects,
-      schedule, toggleSection, removeFromSchedule,
+      schedule, toggleSection, removeFromSchedule, clearAll,
       exportPrefs, setExportPrefs
     }}>
       {children}
