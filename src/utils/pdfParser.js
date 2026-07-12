@@ -135,14 +135,16 @@ function parseCourseLine(text) {
  *   - MIDDLE (on course line, after time): e.g., "LINEA", "AULA", "SB-508"
  *   - SUFFIX (below course line): "LINEA" or "MAGNA"
  */
-function reconstructRoom(courseLineY, lines, index) {
+function reconstructRoom(parsedCourse, lines, index) {
   let prefix = '';
   let suffix = '';
+  const courseY = lines[index].y;
+  let roomMiddle = parsedCourse.roomMiddle;
 
-  // Check line above for room prefix
+  // Check line above for room prefix (e.g., "EN" before "LINEA", "GG-" before "AULA MAGNA")
   if (index > 0) {
     const above = lines[index - 1];
-    const dist = above.y - courseLineY;
+    const dist = above.y - courseY;
     if (dist > 0 && dist <= Y_THRESHOLD) {
       const text = above.text.trim();
       if (ROOM_PREFIXES.has(text)) {
@@ -151,19 +153,26 @@ function reconstructRoom(courseLineY, lines, index) {
     }
   }
 
-  // Check line below for room suffix
+  // Check line below for room continuation
+  // In the PDF, room info sometimes spills to the next line:
+  //   - As a known suffix: "LINEA" or "MAGNA"
+  //   - As the full room code itself: e.g., "A-201", "SB-508", "LAB-101"
   if (index < lines.length - 1) {
     const below = lines[index + 1];
-    const dist = courseLineY - below.y;
+    const dist = courseY - below.y;
     if (dist > 0 && dist <= Y_THRESHOLD) {
       const text = below.text.trim();
       if (ROOM_SUFFIXES.has(text)) {
         suffix = text;
+      } else if (!roomMiddle && !TIME_REGEX.test(text)) {
+        // Room code is on its own line below (not a known suffix,
+        // and not another course row with a time pattern)
+        roomMiddle = text;
       }
     }
   }
 
-  return [prefix, courseLineY.roomMiddle, suffix]
+  return [prefix, roomMiddle, suffix]
     .filter(Boolean)
     .join(' ')
     .replace(/\s+/g, ' ')
