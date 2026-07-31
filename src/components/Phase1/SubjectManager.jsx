@@ -88,13 +88,13 @@ export default function SubjectManager() {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       {/* COLUMNA IZQUIERDA: FORMULARIO */}
-      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-fit sticky top-20">
+      <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 h-fit sticky top-20 dark:bg-slate-900 dark:border-slate-800">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold text-slate-700">
+          <h2 className="text-lg font-semibold text-slate-700 dark:text-slate-300">
             {form.id ? 'Editar Materia' : 'Agregar Nueva Materia'}
           </h2>
           {form.id && (
-            <button onClick={resetForm} className="text-xs text-red-500 hover:underline">
+            <button onClick={resetForm} className="text-xs text-red-500 hover:underline dark:text-red-400">
               Cancelar Edición
             </button>
           )}
@@ -103,7 +103,7 @@ export default function SubjectManager() {
         <form onSubmit={handleSaveSubject} className="space-y-4">
           <div className="grid grid-cols-4 gap-4">
             <div className="col-span-1">
-              <label className="block text-xs font-bold text-slate-500 uppercase">Código</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Código</label>
               <input 
                 type="text" required placeholder="EI-I"
                 className="w-full mt-1 p-2 border rounded-md"
@@ -112,7 +112,7 @@ export default function SubjectManager() {
               />
             </div>
             <div className="col-span-3">
-              <label className="block text-xs font-bold text-slate-500 uppercase">Nombre</label>
+              <label className="block text-xs font-bold text-slate-500 uppercase dark:text-slate-400">Nombre</label>
               <input 
                 type="text" required placeholder="ESTADÍSTICA..."
                 className="w-full mt-1 p-2 border rounded-md"
@@ -123,8 +123,8 @@ export default function SubjectManager() {
           </div>
 
           {/* Sub-formulario Secciones */}
-          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-            <h3 className="text-sm font-medium mb-2 text-slate-600">Gestión de Secciones</h3>
+          <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 dark:bg-slate-800/50 dark:border-slate-700">
+            <h3 className="text-sm font-medium mb-2 text-slate-600 dark:text-slate-400">Gestión de Secciones</h3>
             <div className="grid grid-cols-2 gap-2 mb-2">
               <input className="p-2 border rounded text-sm" placeholder="Sec (01)" value={tempSection.number} onChange={e => setTempSection({...tempSection, number: e.target.value})} />
               <input className="p-2 border rounded text-sm" placeholder="Días (Lu, Vi)" value={tempSection.days} onChange={e => setTempSection({...tempSection, days: e.target.value})} />
@@ -134,7 +134,7 @@ export default function SubjectManager() {
             <button 
               type="button"
               onClick={handleAddSection}
-              className="w-full py-1.5 text-sm bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded font-medium transition-colors"
+              className="w-full py-1.5 text-sm bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded font-medium transition-colors dark:bg-slate-900 dark:border-slate-600 dark:hover:bg-slate-800 dark:text-slate-300"
             >
               + Agregar Sección
             </button>
@@ -143,17 +143,17 @@ export default function SubjectManager() {
           {/* Lista previa de secciones en el form */}
           {form.sections.length > 0 && (
             <div className="space-y-1 max-h-40 overflow-y-auto">
-              <p className="font-bold text-xs text-slate-400 uppercase">Secciones actuales:</p>
+              <p className="font-bold text-xs text-slate-400 uppercase dark:text-slate-500">Secciones actuales:</p>
               {form.sections.map(s => (
-                <div key={s.id} className="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100 group">
+                <div key={s.id} className="flex justify-between items-center bg-slate-50 p-2 rounded border border-slate-100 group dark:bg-slate-800/50 dark:border-slate-800">
                   <div className="text-sm">
-                    <span className="font-bold text-slate-700 mr-2">Sec {s.number}</span>
-                    <span className="text-slate-500 text-xs">{s.days} • {s.time}</span>
+                    <span className="font-bold text-slate-700 mr-2 dark:text-slate-300">Sec {s.number}</span>
+                    <span className="text-slate-500 text-xs dark:text-slate-400">{s.days} • {s.time}</span>
                   </div>
                   <button 
                     type="button" 
                     onClick={() => handleRemoveSection(s.id)}
-                    className="text-red-400 hover:text-red-600 px-2 font-bold"
+                    className="text-red-400 hover:text-red-600 px-2 font-bold dark:hover:text-red-300"
                     title="Quitar sección"
                   >
 <FiX size={14} />
@@ -167,8 +167,8 @@ export default function SubjectManager() {
             type="submit" 
             className={`w-full py-3 text-white rounded-lg font-bold shadow-lg transition-all ${
               form.id 
-                ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/30' 
-                : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/30'
+                ? 'bg-amber-500 hover:bg-amber-600 shadow-amber-500/30 dark:shadow-amber-950/40' 
+                : 'bg-blue-600 hover:bg-blue-700 shadow-blue-500/30 dark:shadow-blue-950/40'
             }`}
           >
             {form.id ? 'Guardar Cambios' : 'Registrar Materia'}
@@ -179,13 +179,13 @@ export default function SubjectManager() {
       {/* COLUMNA DERECHA: LISTADO */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-slate-700">
+          <h2 className="text-lg font-semibold text-slate-700 dark:text-slate-300">
             Materias Disponibles ({subjects.length})
           </h2>
           {subjects.length > 0 && (
             <button
               onClick={() => setShowClearModal(true)}
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-red-600 hover:text-red-700 bg-red-50 hover:bg-red-100 border border-red-200 rounded-lg transition-colors dark:text-red-400 dark:hover:text-red-300 dark:bg-red-950/60 dark:hover:bg-red-900/60 dark:border-red-900"
             >
               <FiTrash2 size={14} />
               Limpiar todo
@@ -194,26 +194,26 @@ export default function SubjectManager() {
         </div>
         
         {subjects.length === 0 ? (
-          <div className="text-center p-8 text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+          <div className="text-center p-8 text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-300 dark:text-slate-500 dark:bg-slate-800/50 dark:border-slate-600">
             No hay materias registradas.
           </div>
         ) : (
           <div className="space-y-3 h-[calc(100vh-150px)] overflow-y-auto pr-2 pb-10">
             {subjects.map(sub => (
-              <div key={sub.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 hover:shadow-md transition-shadow group relative">
+              <div key={sub.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-200 hover:shadow-md transition-shadow group relative dark:bg-slate-900 dark:border-slate-700">
                 
                 {/* Botones de acción (flotantes o en header) */}
-                <div className="absolute top-4 right-4 flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity bg-white pl-2">
+                <div className="absolute top-4 right-4 flex gap-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity bg-white pl-2 dark:bg-slate-900">
                   <button 
                     onClick={() => handleEditClick(sub)}
-                    className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded transition-colors dark:text-slate-500 dark:hover:text-amber-400 dark:hover:bg-amber-950/60"
                     title="Editar"
                   >
 <FiEdit2 size={16} />
                   </button>
                   <button 
                     onClick={() => handleDeleteClick(sub.id, sub.name)}
-                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
+                    className="p-1.5 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors dark:text-slate-500 dark:hover:text-red-400 dark:hover:bg-red-950/60"
                     title="Eliminar"
                   >
                     <FiTrash2 size={16} />
@@ -221,12 +221,12 @@ export default function SubjectManager() {
                 </div>
 
                 <div className="pr-16"> {/* Padding right para no tapar texto con botones */}
-                  <h3 className="font-bold text-slate-800 text-sm">{sub.name}</h3>
+                  <h3 className="font-bold text-slate-800 text-sm dark:text-slate-200">{sub.name}</h3>
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded">
+                    <span className="bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-0.5 rounded dark:bg-slate-800 dark:text-slate-400">
                       {sub.code}
                     </span>
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
                       {sub.sections.length} secciones
                     </span>
                   </div>
@@ -235,11 +235,11 @@ export default function SubjectManager() {
                 {/* Pequeña vista previa de secciones (opcional) */}
                 <div className="mt-3 flex flex-wrap gap-1">
                    {sub.sections.slice(0, 5).map(s => (
-                     <span key={s.id} className="text-[10px] border border-slate-100 bg-slate-50 px-1.5 py-0.5 rounded text-slate-400">
+                     <span key={s.id} className="text-[10px] border border-slate-100 bg-slate-50 px-1.5 py-0.5 rounded text-slate-400 dark:border-slate-800 dark:bg-slate-800/50 dark:text-slate-500">
                        {s.number}
                      </span>
                    ))}
-                   {sub.sections.length > 5 && <span className="text-[10px] text-slate-400">...</span>}
+                   {sub.sections.length > 5 && <span className="text-[10px] text-slate-400 dark:text-slate-500">...</span>}
                 </div>
               </div>
             ))}
@@ -249,28 +249,28 @@ export default function SubjectManager() {
 
       {/* Modal de confirmación para limpiar todo */}
       {showClearModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 dark:bg-black/60">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full p-6 space-y-5 dark:bg-slate-900">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                <FiAlertTriangle className="text-red-600" size={20} />
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0 dark:bg-red-950/60">
+                <FiAlertTriangle className="text-red-600 dark:text-red-400" size={20} />
               </div>
               <div>
-                <h3 className="text-lg font-bold text-slate-800">Limpiar todas las materias</h3>
-                <p className="text-sm text-slate-500">
+                <h3 className="text-lg font-bold text-slate-800 dark:text-slate-200">Limpiar todas las materias</h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
                   Se eliminarán <strong>{subjects.length} materias</strong> y todas las secciones seleccionadas en el horario.
                 </p>
               </div>
             </div>
 
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800">
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-800 dark:bg-amber-950/60 dark:border-amber-800 dark:text-amber-400">
               Esta acción no se puede deshacer.
             </div>
 
             <div className="flex gap-3">
               <button
                 onClick={() => setShowClearModal(false)}
-                className="flex-1 py-2.5 rounded-lg border border-slate-300 text-slate-700 font-medium text-sm hover:bg-slate-50 transition-colors"
+                className="flex-1 py-2.5 rounded-lg border border-slate-300 text-slate-700 font-medium text-sm hover:bg-slate-50 transition-colors dark:border-slate-600 dark:text-slate-300 dark:hover:bg-slate-800"
               >
                 Cancelar
               </button>

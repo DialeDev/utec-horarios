@@ -17,10 +17,10 @@ export default function Landing() {
       <div className="max-w-2xl w-full space-y-8 text-center">
         {/* Hero Section */}
         <div className="space-y-4">
-          <h1 className="text-4xl font-bold text-slate-800 flex items-center justify-center gap-3">
-            <FiCalendar className="text-blue-600" /> Horarios UTEC
+          <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-200 flex items-center justify-center gap-3">
+            <FiCalendar className="text-blue-600 dark:text-blue-400" /> Horarios UTEC
           </h1>
-          <p className="text-lg text-slate-600">
+          <p className="text-lg text-slate-600 dark:text-slate-400">
             Construye tu horario académico de forma rápida y sencilla
           </p>
         </div>
@@ -28,12 +28,12 @@ export default function Landing() {
         {/* Action Buttons */}
         <div className="grid md:grid-cols-2 gap-4">
           {/* PDF Upload */}
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow flex flex-col">
-            <div className="text-4xl mb-4"><FiFile className="inline-block text-slate-600" size={48} /></div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow flex flex-col dark:bg-slate-900 dark:border-slate-700">
+            <div className="text-4xl mb-4"><FiFile className="inline-block text-slate-600 dark:text-slate-400" size={48} /></div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">
               Subir Hoja de Asesorías
             </h2>
-            <p className="text-sm text-slate-500 mb-6">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               Importa tu horario directamente desde el PDF de UTEC
             </p>
             <div className="mt-auto flex justify-center">
@@ -45,12 +45,12 @@ export default function Landing() {
           </div>
 
           {/* Manual Entry */}
-          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow flex flex-col">
-            <div className="text-4xl mb-4"><FiEdit2 className="inline-block text-slate-600" size={48} /></div>
-            <h2 className="text-xl font-bold text-slate-800 mb-2">
+          <div className="bg-white rounded-xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow flex flex-col dark:bg-slate-900 dark:border-slate-700">
+            <div className="text-4xl mb-4"><FiEdit2 className="inline-block text-slate-600 dark:text-slate-400" size={48} /></div>
+            <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200 mb-2">
               Ingresar Manualmente
             </h2>
-            <p className="text-sm text-slate-500 mb-6">
+            <p className="text-sm text-slate-500 dark:text-slate-400 mb-6">
               Agrega tus materias una por una
             </p>
             <div className="mt-auto flex justify-center">
@@ -68,14 +68,14 @@ export default function Landing() {
         </div>
 
         {/* Info Card */}
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-left">
-          <h3 className="font-bold text-blue-800 mb-3 flex items-center gap-2">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-6 text-left dark:bg-blue-950/60 dark:border-blue-800">
+          <h3 className="font-bold text-blue-800 dark:text-blue-300 mb-3 flex items-center gap-2">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
             ¿Cómo funciona?
           </h3>
-          <ol className="space-y-2 text-sm text-blue-700">
+          <ol className="space-y-2 text-sm text-blue-700 dark:text-blue-400">
             <li className="flex items-start gap-2">
               <span className="font-bold">1.</span>
               <span>Sube tu hoja de asesorías en PDF o ingresa tus materias manualmente</span>
@@ -96,12 +96,12 @@ export default function Landing() {
         </div>
 
         {/* Footer */}
-        <footer className="pt-8 border-t border-slate-200">
+        <footer className="pt-8 border-t border-slate-200 dark:border-slate-700">
           <a
             href="https://github.com/DialeDev/utec-horarios/issues"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors"
+            className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors dark:text-slate-400 dark:hover:text-slate-200"
           >
             <FiGithub className="text-lg" />
             ¿Tienes algún problema? Repórtalo aquí

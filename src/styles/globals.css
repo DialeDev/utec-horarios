@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --font-sans: "Inter", system-ui, sans-serif;
   --color-brand: #1a3c5e;
@@ -25,4 +27,12 @@ body {
   background-color: var(--color-surface-soft);
   font-family: var(--font-sans);
   color: var(--color-ink);
+}
+
+.dark {
+  color-scheme: dark;
+  --color-surface: #0f172a;
+  --color-surface-soft: #0b1120;
+  --color-ink: #e2e8f0;
+  --color-hairline: #1e293b;
 }

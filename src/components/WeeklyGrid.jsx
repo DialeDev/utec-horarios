@@ -41,12 +41,12 @@ export default function WeeklyGrid() {
   const totalRows = Math.floor((TIME_END - TIME_START) / SLOT_MINUTES);
 
   return (
-    <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden flex flex-col h-full">
-      <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
-        <h2 className="font-bold text-slate-700">Tu Horario Semanal</h2>
+    <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden flex flex-col h-full dark:bg-slate-900 dark:border-slate-700">
+      <div className="p-4 border-b border-slate-100 bg-slate-50 flex justify-between items-center dark:border-slate-800 dark:bg-slate-800/50">
+        <h2 className="font-bold text-slate-700 dark:text-slate-300">Tu Horario Semanal</h2>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-slate-400">{schedule.length} secciones</span>
-          <span className="text-xs text-slate-400">06:00 - 22:00</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">{schedule.length} secciones</span>
+          <span className="text-xs text-slate-400 dark:text-slate-500">06:00 - 22:00</span>
         </div>
       </div>
       
@@ -58,19 +58,19 @@ export default function WeeklyGrid() {
             gridTemplateRows: `auto repeat(${totalRows}, ${ROW_HEIGHT}px)` 
           }}
         >
-          <div className="bg-slate-100 border-b border-slate-200 left-0"></div>
+          <div className="bg-slate-100 border-b border-slate-200 left-0 dark:bg-slate-800 dark:border-slate-700"></div>
           
           {DAYS.map(day => (
-            <div key={day} className="bg-slate-100 py-2 text-center text-[10px] sm:text-sm font-bold text-slate-600 border-b border-l border-slate-200">
+            <div key={day} className="bg-slate-100 py-2 text-center text-[10px] sm:text-sm font-bold text-slate-600 border-b border-l border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700">
               {day}
             </div>
           ))}
           
-          <div className="sticky left-0 z-10 bg-slate-50 relative overflow-hidden" style={{ gridRow: '2 / -1' }}>
+          <div className="sticky left-0 z-10 bg-slate-50 relative overflow-hidden dark:bg-slate-900" style={{ gridRow: '2 / -1' }}>
             {TIME_LABELS.map((label, idx) => (
               <div 
                 key={idx} 
-                className="text-[10px] text-slate-400 text-right pr-1.5 border-r border-slate-100 absolute left-0 right-0"
+                className="text-[10px] text-slate-400 text-right pr-1.5 border-r border-slate-100 absolute left-0 right-0 dark:text-slate-500 dark:border-slate-800"
                 style={{ 
                   top: `${idx * 2 * ROW_HEIGHT + (idx === 0 ? 8 : 0)}px`,
                   height: `${ROW_HEIGHT * 2}px`
@@ -84,11 +84,11 @@ export default function WeeklyGrid() {
           {DAYS.map(day => (
             <div 
               key={day} 
-              className="relative border-l border-slate-200"
+              className="relative border-l border-slate-200 dark:border-slate-700"
               style={{ gridColumn: DAYS.indexOf(day) + 2, gridRow: '2 / -1' }}
             >
               {Array.from({ length: totalRows }, (_, i) => (
-                <div key={i} className="border-b border-slate-100" style={{ height: `${ROW_HEIGHT}px` }} />
+                <div key={i} className="border-b border-slate-100 dark:border-slate-800" style={{ height: `${ROW_HEIGHT}px` }} />
               ))}
               
               {getClassesForDay(day).map((item) => {
@@ -97,19 +97,19 @@ export default function WeeklyGrid() {
                   <div
                     key={`${item.sectionId}-${day}`}
                     onClick={() => removeFromSchedule(item.id)}
-                    className="absolute inset-x-0.5 cursor-pointer bg-blue-50 border border-blue-200 rounded-md p-1.5 hover:bg-red-50 hover:border-red-300 transition-all overflow-hidden z-10 flex flex-col"
+                    className="absolute inset-x-0.5 cursor-pointer bg-blue-50 border border-blue-200 rounded-md p-1.5 hover:bg-red-50 hover:border-red-300 transition-all overflow-hidden z-10 flex flex-col dark:bg-blue-950/60 dark:border-blue-800 dark:hover:bg-red-950/60 dark:hover:border-red-800"
                     style={{
                       top: `${(rowStart - 2) * ROW_HEIGHT}px`,
                       height: `${rowSpan * ROW_HEIGHT - 2}px`,
                     }}
                   >
-                    <div className="text-[10px] font-bold text-blue-900 truncate leading-tight">
+                    <div className="text-[10px] font-bold text-blue-900 truncate leading-tight dark:text-blue-300">
                       {item.name}
                     </div>
-                    <div className="text-[9px] text-blue-900 truncate leading-tight">
+                    <div className="text-[9px] text-blue-900 truncate leading-tight dark:text-blue-300">
                       {item.time}
                     </div>
-                    <div className="text-[8px] text-blue-900 truncate leading-tight mt-auto flex justify-between">
+                    <div className="text-[8px] text-blue-900 truncate leading-tight mt-auto flex justify-between dark:text-blue-300">
                       <span>Sec {item.number}</span>
                       <span>{formatRoom(item.room)}</span>
                     </div>
